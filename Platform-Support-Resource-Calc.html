@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Support Resource Calculator</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --warning: #ca8a04;
+            --project: #8b5cf6; 
+            --admin: #64748b; 
+            --mentor: #06b6d4;
+            --bg: #f3f4f6;
+            --card: #ffffff;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: #1f2937;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 { margin: 0; color: #111827; }
+        .header p { color: #6b7280; margin-top: 5px; }
+        
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .calculator-grid { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Input Styling */
+        .input-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        select, input[type="number"], input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        /* Checkbox Styling */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .checkbox-group:hover { background: #f9fafb; }
+        .checkbox-group input { margin-right: 12px; width: 20px; height: 20px; }
+        
+        /* Result Styling */
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .big-number {
+            font-size: 32px;
+            font-weight: 800;
+        }
+        .positive { color: var(--success); }
+        .negative { color: var(--danger); }
+
+        /* Bar Chart */
+        .bar-container { margin-top: 20px; }
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        .progress-bg {
+            background: #e5e7eb;
+            height: 24px;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+        }
+        .segment {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        
+        /* Legend */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 25px;
+            font-size: 13px;
+        }
+        .legend-item { display: flex; align-items: center; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+
+        .note {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 20px;
+            background: #f0fdf4;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 4px solid var(--success);
+        }
+        .warning-box {
+            background: #fef2f2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #fee2e2;
+            display: none;
+        }
+        
+        .range-value { font-weight: normal; color: #6b7280; float: right; }
+
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Platform Team Capacity Planner</h1>
+    <p>Calculate "Spare Capacity" after deducting Rota, Walk-ups, Mentoring & Meetings</p>
+</div>
+
+<div class="calculator-grid">
+    <!-- Input Section -->
+    <div class="card">
+        <h2>1. Role & Environment</h2>
+        
+        <div class="input-group">
+            <label>Team Member Name</label>
+            <input type="text" id="nameInput" placeholder="e.g. Corey" oninput="calculate()">
+        </div>
+
+        <div class="input-group">
+            <label>Weekly Available Hours</label>
+            <input type="number" id="totalHours" value="35" oninput="calculate()">
+        </div>
+
+        <div class="input-group">
+            <label>Days in Office (Weekly) <span id="daysValue" class="range-value">3 days</span></label>
+            <input type="range" id="officeDays" min="0" max="5" step="1" value="3" oninput="calculate()">
+            <div style="font-size: 12px; color: #666; margin-top: 4px;">Adds 1h "Walk-up Tax" per day present</div>
+        </div>
+
+        <div class="input-group">
+            <label>Avg. Meeting Hours (Weekly)</label>
+            <input type="number" id="meetingHours" value="5" oninput="calculate()">
+        </div>
+
+        <h3>2. Commitments</h3>
+        
+        <label class="checkbox-group">
+            <input type="checkbox" id="supportRota" onchange="calculate()">
+            <div>
+                <strong>Active Support Rota</strong>
+                <div style="font-size: 12px; color: #666;">Dedicated Ticket Duty (Reserves 20h)</div>
+            </div>
+        </label>
+
+        <label class="checkbox-group">
+            <input type="checkbox" id="escalationPoint" onchange="calculate()">
+            <div>
+                <strong>Escalation Point / Mentor</strong>
+                <div style="font-size: 12px; color: #666;">Technical Assist, Training & Emergencies (Reserves 5h)</div>
+            </div>
+        </label>
+
+        <label class="checkbox-group">
+            <input type="checkbox" id="mgmtOverhead" onchange="calculate()">
+            <div>
+                <strong>Management / Lead Duties</strong>
+                <div style="font-size: 12px; color: #666;">Hiring, Reports, Strategy (Reserves 10h)</div>
+            </div>
+        </label>
+
+        <label class="checkbox-group">
+            <input type="checkbox" id="assignedProject" onchange="calculate()">
+            <div>
+                <strong>Assigned Project Owner</strong>
+                <div style="font-size: 12px; color: #666;">Leading a project (Reserves 15h)</div>
+            </div>
+        </label>
+
+    </div>
+
+    <!-- Output Section -->
+    <div class="card">
+        <div class="result-header">
+            <h3>Weekly Balance</h3>
+            <div id="statusBadge" style="padding: 5px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; background: #dcfce7; color: #166534;">
+                Available
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="font-size: 14px; color: #6b7280; margin-bottom: 5px;">Spare / Unallocated Hours</div>
+            <div id="remainingHours" class="big-number positive">0h</div>
+        </div>
+
+        <!-- Visualization -->
+        <div class="bar-container">
+            <div class="bar-label"><span>Weekly Allocation</span> <span id="totalUsedLabel">0/40h</span></div>
+            <div class="progress-bg">
+                <div id="barAdmin" class="segment" style="background: #64748b; width: 0%"></div> <!-- Grey -->
+                <div id="barSupport" class="segment" style="background: #ef4444; width: 0%"></div> <!-- Red -->
+                <div id="barMentor" class="segment" style="background: #06b6d4; width: 0%"></div> <!-- Cyan (Mentor) -->
+                <div id="barMgmt" class="segment" style="background: #f59e0b; width: 0%"></div> <!-- Orange -->
+                <div id="barProject" class="segment" style="background: #8b5cf6; width: 0%"></div> <!-- Purple -->
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item"><div class="dot" style="background: #64748b;"></div>Meetings & Admin</div>
+            <div class="legend-item"><div class="dot" style="background: #ef4444;"></div>Rota & Walk-ups</div>
+            <div class="legend-item"><div class="dot" style="background: #06b6d4;"></div>Mentor & Escalations</div>
+            <div class="legend-item"><div class="dot" style="background: #f59e0b;"></div>Management</div>
+            <div class="legend-item"><div class="dot" style="background: #8b5cf6;"></div>Project Work</div>
+        </div>
+
+        <div id="warningBox" class="warning-box">
+            <strong>⚠️ Over Capacity</strong><br>
+            <span id="warningText"></span>
+        </div>
+
+        <div id="projectNote" class="note" style="display:none;">
+            ✅ <strong>Safe:</strong> You have spare hours available.
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function calculate() {
+        // 1. Get Inputs
+        const totalHours = parseFloat(document.getElementById('totalHours').value) || 0;
+        const daysInOffice = parseInt(document.getElementById('officeDays').value) || 0;
+        const meetingHours = parseFloat(document.getElementById('meetingHours').value) || 0;
+        
+        const onRota = document.getElementById('supportRota').checked;
+        const isEscalation = document.getElementById('escalationPoint').checked;
+        const isMgmt = document.getElementById('mgmtOverhead').checked;
+        const hasProject = document.getElementById('assignedProject').checked;
+
+        // Update Slider Label
+        document.getElementById('daysValue').innerText = daysInOffice + (daysInOffice === 1 ? " day" : " days");
+
+        // 2. Define Constants
+        const BASE_SHRINKAGE = 2.5; // 30 mins/day fixed tax
+        
+        // Logic breakdown
+        const ROTA_HOURS = onRota ? 20 : 0; 
+        const WALKUP_HOURS = daysInOffice * 1; 
+        const MENTOR_HOURS = isEscalation ? 5 : 0; // New Escalation tax
+        const MGMT_HOURS = isMgmt ? 10 : 0; 
+        const PROJECT_HOURS = hasProject ? 15 : 0; 
+        
+        // 3. Calculate Usage
+        let usedAdmin = BASE_SHRINKAGE + meetingHours;
+        let usedSupport = ROTA_HOURS + WALKUP_HOURS;
+        let usedMentor = MENTOR_HOURS;
+        let usedMgmt = MGMT_HOURS;
+        let usedProject = PROJECT_HOURS;
+        
+        let totalUsed = usedAdmin + usedSupport + usedMentor + usedMgmt + usedProject;
+        let remaining = totalHours - totalUsed;
+
+        // 4. Update UI - Numbers
+        const remainingEl = document.getElementById('remainingHours');
+        const badge = document.getElementById('statusBadge');
+        const warningBox = document.getElementById('warningBox');
+        const warningText = document.getElementById('warningText');
+        const projectNote = document.getElementById('projectNote');
+
+        if (remaining < 0) {
+            remainingEl.innerText = remaining + "h";
+            remainingEl.className = "big-number negative";
+            badge.style.background = "#fee2e2";
+            badge.style.color = "#991b1b";
+            badge.innerText = "Over Capacity";
+            
+            warningBox.style.display = "block";
+            warningText.innerText = "This schedule requires " + totalUsed + " hours. You are in deficit.";
+            projectNote.style.display = "none";
+        } else {
+            remainingEl.innerText = remaining + "h";
+            remainingEl.className = "big-number positive";
+            badge.style.background = "#dcfce7";
+            badge.style.color = "#166534";
+            badge.innerText = "Healthy";
+            warningBox.style.display = "none";
+            projectNote.style.display = "block";
+        }
+
+        // 5. Update UI - Bars
+        const pAdmin = (usedAdmin / totalHours) * 100;
+        const pSupport = (usedSupport / totalHours) * 100;
+        const pMentor = (usedMentor / totalHours) * 100;
+        const pMgmt = (usedMgmt / totalHours) * 100;
+        const pProject = (usedProject / totalHours) * 100;
+
+        document.getElementById('barAdmin').style.width = pAdmin + "%";
+        document.getElementById('barSupport').style.width = pSupport + "%";
+        document.getElementById('barMentor').style.width = pMentor + "%";
+        document.getElementById('barMgmt').style.width = pMgmt + "%";
+        document.getElementById('barProject').style.width = pProject + "%";
+        
+        document.getElementById('totalUsedLabel').innerText = Math.min(totalUsed, totalHours) + "/" + totalHours + "h";
+    }
+
+    // Run on load
+    calculate();
+</script>
+
+</body>
+</html>
