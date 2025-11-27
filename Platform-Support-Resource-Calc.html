@@ -6,21 +6,26 @@
     <title>Platform Support Resource Calculator</title>
     <style>
         :root {
-            --primary: #2563eb;
-            --danger: #dc2626;
-            --success: #16a34a;
-            --warning: #ca8a04;
-            --project: #8b5cf6; 
-            --admin: #64748b; 
-            --mentor: #06b6d4; 
-            --buffer: #a8a29e;
-            --bg: #f3f4f6;
+            --bg: #f8fafc;
             --card: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            
+            /* Unified Color Palette (Matches Dashboard) */
+            --col-admin: #64748b;   /* Meetings & Admin */
+            --col-rota: #ef4444;    /* Tickets & Walk-ups */
+            --col-mentor: #06b6d4;  /* Mentor & Escalations */
+            --col-mgmt: #f59e0b;    /* Management */
+            --col-proj: #8b5cf6;    /* Project Work */
+            --col-unplanned: #db2777; /* Unplanned Work */
+            --col-buffer: #a8a29e;  /* Safety Buffer */
+            
+            --green: #22c55e;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
-            color: #1f2937;
+            color: var(--text);
             padding: 20px;
             max-width: 900px;
             margin: 0 auto;
@@ -29,8 +34,8 @@
             text-align: center;
             margin-bottom: 30px;
         }
-        .header h1 { margin: 0; color: #111827; }
-        .header p { color: #6b7280; margin-top: 5px; }
+        .header h1 { margin: 0; color: #0f172a; }
+        .header p { color: #64748b; margin-top: 5px; }
         
         .calculator-grid {
             display: grid;
@@ -46,15 +51,19 @@
             padding: 24px;
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
         }
+
+        h2, h3 { color: #334155; margin-top: 0; }
+        h3 { font-size: 16px; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
 
         /* Input Styling */
         .input-group { margin-bottom: 20px; }
-        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #475569; }
         select, input[type="number"], input[type="range"] {
             width: 100%;
             padding: 10px;
-            border: 1px solid #d1d5db;
+            border: 1px solid #cbd5e1;
             border-radius: 6px;
             font-size: 16px;
             box-sizing: border-box;
@@ -65,19 +74,19 @@
             display: flex;
             align-items: center;
             padding: 12px;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
             margin-bottom: 12px;
             cursor: pointer;
             transition: background 0.2s;
-            background: white;
+            background: #f8fafc;
         }
-        .checkbox-group:hover { background: #f9fafb; }
+        .checkbox-group:hover { background: #f1f5f9; }
         .checkbox-group input { margin-right: 12px; width: 20px; height: 20px; }
         
-        /* Compound Group for Settings */
+        /* Compound Group */
         .compound-group {
-            border: 1px solid #e5e7eb;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
             margin-bottom: 12px;
             overflow: hidden;
@@ -86,12 +95,13 @@
             border: none;
             margin-bottom: 0;
             border-radius: 0;
+            background: white;
         }
         .compound-settings {
             background: #f8fafc;
-            border-top: 1px solid #e5e7eb;
+            border-top: 1px solid #e2e8f0;
             padding: 10px 15px;
-            display: none; /* Hidden by default */
+            display: none; 
         }
         .compound-settings .setting-row {
             display: flex;
@@ -102,11 +112,13 @@
             margin: 0;
             font-weight: 500;
             color: #4b5563;
+            font-size: 13px;
         }
         .compound-settings input[type="number"] {
             width: 80px;
             padding: 6px;
             text-align: right;
+            font-size: 14px;
         }
         
         /* Result Styling */
@@ -116,14 +128,11 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e2e8f0;
         }
-        .big-number {
-            font-size: 32px;
-            font-weight: 800;
-        }
-        .positive { color: var(--success); }
-        .negative { color: var(--danger); }
+        .big-number { font-size: 32px; font-weight: 800; }
+        .positive { color: var(--green); }
+        .negative { color: var(--col-rota); }
 
         /* Bar Chart */
         .bar-container { margin-top: 20px; }
@@ -133,49 +142,41 @@
             font-size: 14px;
             margin-bottom: 4px;
             font-weight: 500;
+            color: #475569;
         }
         .progress-bg {
-            background: #e5e7eb;
+            background: #e2e8f0;
             height: 24px;
             border-radius: 12px;
             overflow: hidden;
             display: flex;
         }
-        .segment {
-            height: 100%;
-            transition: width 0.5s ease;
-        }
-        /* Striped pattern for buffer */
-        .segment-buffer {
-            background-image: repeating-linear-gradient(
-                45deg,
-                #d6d3d1,
-                #d6d3d1 10px,
-                #e7e5e4 10px,
-                #e7e5e4 20px
-            );
-        }
+        .segment { height: 100%; transition: width 0.5s ease; }
         
+        /* Colors Classes */
+        .bg-admin { background: var(--col-admin); }
+        .bg-rota { background: var(--col-rota); }
+        .bg-mentor { background: var(--col-mentor); }
+        .bg-mgmt { background: var(--col-mgmt); }
+        .bg-proj { background: var(--col-proj); }
+        .bg-unplanned { background: var(--col-unplanned); }
+        .bg-buffer { 
+            background-color: var(--col-buffer);
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.2) 5px, rgba(255,255,255,0.2) 10px);
+        }
+
         /* Legend */
         .legend {
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 12px;
             margin-top: 25px;
-            font-size: 13px;
+            font-size: 12px;
+            color: #475569;
         }
         .legend-item { display: flex; align-items: center; }
         .dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
 
-        .note {
-            font-size: 13px;
-            color: #6b7280;
-            margin-top: 20px;
-            background: #f0fdf4;
-            padding: 10px;
-            border-radius: 6px;
-            border-left: 4px solid var(--success);
-        }
         .warning-box {
             background: #fef2f2;
             color: #991b1b;
@@ -184,23 +185,25 @@
             margin-top: 20px;
             border: 1px solid #fee2e2;
             display: none;
+            font-size: 13px;
+            line-height: 1.5;
         }
         
-        .range-value { font-weight: normal; color: #6b7280; float: right; }
+        .range-value { font-weight: normal; color: #64748b; float: right; }
 
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>Platform Team Capacity Planner</h1>
-    <p>Calculate "Deep Work" availability with adjustable commitments & safety buffers</p>
+    <h1>Platform Support Resource Calculator</h1>
+    <p>Weekly Capacity Planner</p>
 </div>
 
 <div class="calculator-grid">
     <!-- Input Section -->
     <div class="card">
-        <h2>1. Role & Policy</h2>
+        <h2>1. Role & Availability</h2>
         
         <div class="input-group">
             <label>Team Member Name</label>
@@ -215,21 +218,23 @@
         <div class="input-group">
             <label>Days in Office (Weekly) <span id="daysValue" class="range-value">3 days</span></label>
             <input type="range" id="officeDays" min="0" max="5" step="1" value="3" oninput="calculate()">
-            <div style="font-size: 12px; color: #666; margin-top: 4px;">Adds 1h "Walk-up Tax" per day present</div>
+            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Adds 1h "Walk-up Tax" per day present</div>
         </div>
 
         <div class="input-group">
-            <label>Avg. Meeting Hours (Weekly)</label>
-            <input type="number" id="meetingHours" value="5" oninput="calculate()">
+            <label>Meetings & Admin (Weekly Hrs)</label>
+            <input type="number" id="adminHours" value="5" oninput="calculate()">
         </div>
 
-        <!-- Buffer Section -->
+        <h3>2. Commitments (Target/Plan)</h3>
+        
+        <!-- Safety Buffer -->
         <div class="compound-group">
             <label class="checkbox-group">
                 <input type="checkbox" id="useBuffer" checked onchange="calculate()">
                 <div style="flex-grow: 1;">
-                    <strong>Reserve Capacity Buffer</strong>
-                    <div style="font-size: 12px; color: #666;">Prevent 100% booking (Default 15%)</div>
+                    <strong>Reserve Safety Buffer</strong>
+                    <div style="font-size: 12px; color: #64748b;">Prevent 100% booking</div>
                 </div>
             </label>
             <div id="bufferSettings" class="compound-settings" style="display: block;">
@@ -240,32 +245,33 @@
             </div>
         </div>
 
-        <h3>2. Commitments</h3>
-        
-        <!-- Support Rota -->
+        <!-- Tickets & Walk-ups -->
         <div class="compound-group">
             <label class="checkbox-group">
                 <input type="checkbox" id="supportRota" onchange="calculate()">
                 <div style="flex-grow: 1;">
-                    <strong>Active Support Rota</strong>
-                    <div style="font-size: 12px; color: #666;">Dedicated Ticket Duty</div>
+                    <strong>Tickets & Walk-ups</strong>
+                    <div style="font-size: 12px; color: #64748b;">Ticket Duty + Physical Interruptions</div>
                 </div>
             </label>
             <div id="rotaSettings" class="compound-settings">
                 <div class="setting-row">
-                    <label>Rota Hours:</label>
+                    <label>Dedicated Ticket Hours:</label>
                     <input type="number" id="rotaHourValue" value="20" oninput="calculate()">
+                </div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 5px; text-align: right;">
+                    + <span id="walkupCalc">3</span>h Walk-up Tax
                 </div>
             </div>
         </div>
 
-        <!-- Escalation/Mentor -->
+        <!-- Mentor -->
         <div class="compound-group">
             <label class="checkbox-group">
                 <input type="checkbox" id="escalationPoint" onchange="calculate()">
                 <div style="flex-grow: 1;">
-                    <strong>Escalation Point / Mentor</strong>
-                    <div style="font-size: 12px; color: #666;">Technical Assist & Training</div>
+                    <strong>Mentor & Escalations</strong>
+                    <div style="font-size: 12px; color: #64748b;">Technical Assist & Training</div>
                 </div>
             </label>
             <div id="mentorSettings" class="compound-settings">
@@ -281,8 +287,8 @@
             <label class="checkbox-group">
                 <input type="checkbox" id="mgmtOverhead" onchange="calculate()">
                 <div style="flex-grow: 1;">
-                    <strong>Management / Lead Duties</strong>
-                    <div style="font-size: 12px; color: #666;">Hiring, Reports, Strategy</div>
+                    <strong>Management</strong>
+                    <div style="font-size: 12px; color: #64748b;">Hiring, Reports, Strategy</div>
                 </div>
             </label>
             <div id="mgmtSettings" class="compound-settings">
@@ -293,13 +299,30 @@
             </div>
         </div>
 
+        <!-- Unplanned Work -->
+        <div class="compound-group">
+            <label class="checkbox-group">
+                <input type="checkbox" id="unplannedWork" onchange="calculate()">
+                <div style="flex-grow: 1;">
+                    <strong>Unplanned Work</strong>
+                    <div style="font-size: 12px; color: #64748b;">Reserve time for firefighting</div>
+                </div>
+            </label>
+            <div id="unplannedSettings" class="compound-settings">
+                <div class="setting-row">
+                    <label>Reserve Hours:</label>
+                    <input type="number" id="unplannedHourValue" value="5" oninput="calculate()">
+                </div>
+            </div>
+        </div>
+
         <!-- Project -->
         <div class="compound-group">
             <label class="checkbox-group">
                 <input type="checkbox" id="assignedProject" onchange="calculate()">
                 <div style="flex-grow: 1;">
-                    <strong>Assigned Project Owner</strong>
-                    <div style="font-size: 12px; color: #666;">Leading a project</div>
+                    <strong>Project Work</strong>
+                    <div style="font-size: 12px; color: #64748b;">Leading a project</div>
                 </div>
             </label>
             <div id="projectSettings" class="compound-settings">
@@ -322,7 +345,7 @@
         </div>
 
         <div style="text-align: center; margin-bottom: 30px;">
-            <div style="font-size: 14px; color: #6b7280; margin-bottom: 5px;">Spare / Unallocated Hours</div>
+            <div style="font-size: 14px; color: #64748b; margin-bottom: 5px;">Spare / Unallocated Hours</div>
             <div id="remainingHours" class="big-number positive">0h</div>
         </div>
 
@@ -330,31 +353,29 @@
         <div class="bar-container">
             <div class="bar-label"><span>Weekly Allocation</span> <span id="totalUsedLabel">0/40h</span></div>
             <div class="progress-bg">
-                <div id="barAdmin" class="segment" style="background: #64748b; width: 0%"></div> <!-- Grey -->
-                <div id="barSupport" class="segment" style="background: #ef4444; width: 0%"></div> <!-- Red -->
-                <div id="barMentor" class="segment" style="background: #06b6d4; width: 0%"></div> <!-- Cyan -->
-                <div id="barMgmt" class="segment" style="background: #f59e0b; width: 0%"></div> <!-- Orange -->
-                <div id="barProject" class="segment" style="background: #8b5cf6; width: 0%"></div> <!-- Purple -->
-                <div id="barBuffer" class="segment segment-buffer" style="width: 0%"></div> <!-- Striped Buffer -->
+                <div id="barAdmin" class="segment bg-admin" style="width: 0%"></div>
+                <div id="barRota" class="segment bg-rota" style="width: 0%"></div>
+                <div id="barMentor" class="segment bg-mentor" style="width: 0%"></div>
+                <div id="barMgmt" class="segment bg-mgmt" style="width: 0%"></div>
+                <div id="barUnplanned" class="segment bg-unplanned" style="width: 0%"></div>
+                <div id="barProject" class="segment bg-proj" style="width: 0%"></div>
+                <div id="barBuffer" class="segment bg-buffer" style="width: 0%"></div>
             </div>
         </div>
 
         <div class="legend">
-            <div class="legend-item"><div class="dot" style="background: #64748b;"></div>Meetings & Admin</div>
-            <div class="legend-item"><div class="dot" style="background: #ef4444;"></div>Rota & Walk-ups</div>
-            <div class="legend-item"><div class="dot" style="background: #06b6d4;"></div>Mentor & Escalations</div>
-            <div class="legend-item"><div class="dot" style="background: #f59e0b;"></div>Management</div>
-            <div class="legend-item"><div class="dot" style="background: #8b5cf6;"></div>Project Work</div>
-            <div class="legend-item"><div class="dot segment-buffer" style="border: 1px solid #ccc;"></div>Safety Buffer</div>
+            <div class="legend-item"><div class="dot bg-admin"></div>Mtgs & Admin</div>
+            <div class="legend-item"><div class="dot bg-rota"></div>Tickets & Walk-ups</div>
+            <div class="legend-item"><div class="dot bg-mentor"></div>Mentor</div>
+            <div class="legend-item"><div class="dot bg-mgmt"></div>Management</div>
+            <div class="legend-item"><div class="dot bg-unplanned"></div>Unplanned</div>
+            <div class="legend-item"><div class="dot bg-proj"></div>Project</div>
+            <div class="legend-item"><div class="dot bg-buffer" style="border: 1px solid #ccc;"></div>Buffer</div>
         </div>
 
         <div id="warningBox" class="warning-box">
             <strong>⚠️ Over Capacity</strong><br>
             <span id="warningText"></span>
-        </div>
-
-        <div id="projectNote" class="note" style="display:none;">
-            ✅ <strong>Safe:</strong> You are within your booking limits.
         </div>
 
     </div>
@@ -365,42 +386,39 @@
         // 1. Get Inputs
         const totalHours = parseFloat(document.getElementById('totalHours').value) || 0;
         const daysInOffice = parseInt(document.getElementById('officeDays').value) || 0;
-        const meetingHours = parseFloat(document.getElementById('meetingHours').value) || 0;
+        const adminHours = parseFloat(document.getElementById('adminHours').value) || 0;
         
         const onRota = document.getElementById('supportRota').checked;
         const isEscalation = document.getElementById('escalationPoint').checked;
         const isMgmt = document.getElementById('mgmtOverhead').checked;
         const hasProject = document.getElementById('assignedProject').checked;
+        const hasUnplanned = document.getElementById('unplannedWork').checked;
         const useBuffer = document.getElementById('useBuffer').checked;
 
-        // Toggle Visibility of Settings
+        // Toggle Settings Visibility
         document.getElementById('rotaSettings').style.display = onRota ? 'block' : 'none';
         document.getElementById('mentorSettings').style.display = isEscalation ? 'block' : 'none';
         document.getElementById('mgmtSettings').style.display = isMgmt ? 'block' : 'none';
         document.getElementById('projectSettings').style.display = hasProject ? 'block' : 'none';
+        document.getElementById('unplannedSettings').style.display = hasUnplanned ? 'block' : 'none';
         document.getElementById('bufferSettings').style.display = useBuffer ? 'block' : 'none';
 
-        // Update Slider Label
+        // Update Slider Labels
         document.getElementById('daysValue').innerText = daysInOffice + (daysInOffice === 1 ? " day" : " days");
+        document.getElementById('walkupCalc').innerText = daysInOffice;
 
-        // 2. Constants & Variables
-        const BASE_SHRINKAGE = 2.5; // 30 mins/day fixed tax
+        // 2. Logic & Calculation
         
-        // --- Granular Inputs ---
-        
-        // Rota Logic: Base adjustable hours + Walkup Tax
+        // Rota Logic: Base Ticket Hours + Walkup Tax
         const rotaBase = onRota ? (parseFloat(document.getElementById('rotaHourValue').value) || 0) : 0;
         const walkupTax = daysInOffice * 1; 
-        const supportTotal = rotaBase + walkupTax;
+        const rotaTotal = rotaBase + walkupTax;
 
-        // Mentor Logic
+        // Others
         const mentorBase = isEscalation ? (parseFloat(document.getElementById('mentorHourValue').value) || 0) : 0;
-        
-        // Mgmt Logic
         const mgmtBase = isMgmt ? (parseFloat(document.getElementById('mgmtHourValue').value) || 0) : 0;
-
-        // Project Logic
         const projectBase = hasProject ? (parseFloat(document.getElementById('projectHourValue').value) || 0) : 0;
+        const unplannedBase = hasUnplanned ? (parseFloat(document.getElementById('unplannedHourValue').value) || 0) : 0;
 
         // Buffer Logic
         let bufferHours = 0;
@@ -409,19 +427,10 @@
             bufferHours = totalHours * (bufferPct / 100);
         }
 
-        // 3. Calculate Usage
-        let usedAdmin = BASE_SHRINKAGE + meetingHours;
-        let usedSupport = supportTotal;
-        let usedMentor = mentorBase;
-        let usedMgmt = mgmtBase;
-        let usedProject = projectBase;
-        
-        // Total "Work" (excluding buffer)
-        let workTotal = usedAdmin + usedSupport + usedMentor + usedMgmt + usedProject;
-        
-        // Total including buffer for capacity check
+        // 3. Totals
+        // "Work" excludes buffer for the purpose of the 'work bars', but 'Total Used' includes buffer
+        let workTotal = adminHours + rotaTotal + mentorBase + mgmtBase + projectBase + unplannedBase;
         let grandTotal = workTotal + bufferHours;
-        
         let remaining = totalHours - grandTotal;
 
         // 4. Update UI - Numbers
@@ -429,7 +438,6 @@
         const badge = document.getElementById('statusBadge');
         const warningBox = document.getElementById('warningBox');
         const warningText = document.getElementById('warningText');
-        const projectNote = document.getElementById('projectNote');
 
         if (remaining < 0) {
             remainingEl.innerText = remaining.toFixed(1) + "h";
@@ -439,34 +447,30 @@
             badge.innerText = "Over Capacity";
             
             warningBox.style.display = "block";
-            let msg = "You are booked for " + workTotal.toFixed(1) + "h work";
-            if(useBuffer) msg += " + " + bufferHours.toFixed(1) + "h buffer";
-            msg += ". Total: " + grandTotal.toFixed(1) + "h.";
-            warningText.innerText = msg;
-            
-            projectNote.style.display = "none";
+            warningText.innerText = "You have allocated " + grandTotal.toFixed(1) + " hours in a " + totalHours + " hour week.";
         } else {
             remainingEl.innerText = remaining.toFixed(1) + "h";
             remainingEl.className = "big-number positive";
             badge.style.background = "#dcfce7";
             badge.style.color = "#166534";
-            badge.innerText = "Healthy";
+            badge.innerText = "Available";
             warningBox.style.display = "none";
-            projectNote.style.display = "block";
         }
 
         // 5. Update UI - Bars
-        const pAdmin = (usedAdmin / totalHours) * 100;
-        const pSupport = (usedSupport / totalHours) * 100;
-        const pMentor = (usedMentor / totalHours) * 100;
-        const pMgmt = (usedMgmt / totalHours) * 100;
-        const pProject = (usedProject / totalHours) * 100;
+        const pAdmin = (adminHours / totalHours) * 100;
+        const pRota = (rotaTotal / totalHours) * 100;
+        const pMentor = (mentorBase / totalHours) * 100;
+        const pMgmt = (mgmtBase / totalHours) * 100;
+        const pUnplanned = (unplannedBase / totalHours) * 100;
+        const pProject = (projectBase / totalHours) * 100;
         const pBuffer = (bufferHours / totalHours) * 100;
 
         document.getElementById('barAdmin').style.width = pAdmin + "%";
-        document.getElementById('barSupport').style.width = pSupport + "%";
+        document.getElementById('barRota').style.width = pRota + "%";
         document.getElementById('barMentor').style.width = pMentor + "%";
         document.getElementById('barMgmt').style.width = pMgmt + "%";
+        document.getElementById('barUnplanned').style.width = pUnplanned + "%";
         document.getElementById('barProject').style.width = pProject + "%";
         document.getElementById('barBuffer').style.width = pBuffer + "%";
         
