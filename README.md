@@ -26,7 +26,7 @@ Granular Commitment Control: Adjust hours for Support Rota, Management, and Ment
 
 The "Walk-up Tax": Automatically calculates lost hours based on how many days per week the engineer is physically in the office.
 
-Safety Buffers: Includes a configurable "Slack Time" (default 15%) to prevent 100% utilization booking (which always leads to burnout).
+Safety Buffers: Includes a configurable "Unbooked Time" (default 15%) to prevent 100% utilisation booking (which always leads to burnout).
 
 Visual Feedback: Instant red/green feedback loops to show when a team member is over-committed.
 
