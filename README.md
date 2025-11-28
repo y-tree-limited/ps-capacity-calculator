@@ -10,11 +10,11 @@ Unlike standard engineering capacity planners--which assume developers have flat
 
 Standard capacity spreadsheets usually fail for Support teams because they don't capture the binary nature of our work:
 
-The "Office Anchor" Tax: If you are physically in the office, you are getting tapped on the shoulder, even if you aren't "on duty."
+The "Office Anchor" Tax: If you are physically in the office, you are getting tapped on the shoulder, even if you aren't "on duty".
 
-Binary Availability: You are either "On Rota" (interrupted every 15 mins) or "Off Rota." Percentages don't reflect this reality.
+Binary Availability: You are either "Goalkeeper" (interrupted every 15 mins) or "Contributor" (interrupted every hour). Percentages don't reflect this reality.
 
-Invisible Work: Mentoring, ad-hoc training, and "quick fixes" often eat up 20% of a Senior Engineer's week, but go untracked.
+Invisible Work: Mentoring, ad-hoc training, and "quick fixes" often eat up 20% of an Engineer's week, but go untracked.
 
 -----
 
