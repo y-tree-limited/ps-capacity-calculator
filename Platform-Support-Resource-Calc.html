@@ -11,13 +11,14 @@
             --text: #1e293b;
             --border: #e2e8f0;
             
-            /* Unified Color Palette (Matches Dashboard) */
+            /* Unified Color Palette */
             --col-admin: #64748b;   /* Meetings & Admin */
-            --col-rota: #ef4444;    /* Tickets & Walk-ups */
+            --col-rota: #ef4444;    /* Tickets (Planned) */
+            --col-walkup: #991b1b;  /* Walk-ups (Physical Tax) - Dark Red */
             --col-mentor: #06b6d4;  /* Mentor & Escalations */
             --col-mgmt: #f59e0b;    /* Management */
             --col-proj: #8b5cf6;    /* Project Work */
-            --col-unplanned: #db2777; /* Unplanned Work */
+            --col-unplanned: #db2777; /* Unplanned Firefighting */
             --col-buffer: #a8a29e;  /* Safety Buffer */
             
             --green: #22c55e;
@@ -156,6 +157,7 @@
         /* Colors Classes */
         .bg-admin { background: var(--col-admin); }
         .bg-rota { background: var(--col-rota); }
+        .bg-walkup { background: var(--col-walkup); }
         .bg-mentor { background: var(--col-mentor); }
         .bg-mgmt { background: var(--col-mgmt); }
         .bg-proj { background: var(--col-proj); }
@@ -216,9 +218,11 @@
         </div>
 
         <div class="input-group">
-            <label>Days in Office (Weekly) <span id="daysValue" class="range-value">3 days</span></label>
-            <input type="range" id="officeDays" min="0" max="5" step="1" value="3" oninput="calculate()">
-            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Adds 1h "Walk-up Tax" per day present</div>
+            <label>Days in Office (Weekly) <span id="daysValue" class="range-value">2 days</span></label>
+            <input type="range" id="officeDays" min="0" max="5" step="1" value="2" oninput="calculate()">
+            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+                Adds <span style="font-weight:bold" id="walkupHoursDisplay">2</span>h "Walk-up Tax" (Physical Interruptions)
+            </div>
         </div>
 
         <div class="input-group">
@@ -245,22 +249,19 @@
             </div>
         </div>
 
-        <!-- Tickets & Walk-ups -->
+        <!-- Tickets -->
         <div class="compound-group">
             <label class="checkbox-group">
                 <input type="checkbox" id="supportRota" onchange="calculate()">
                 <div style="flex-grow: 1;">
-                    <strong>Tickets & Walk-ups</strong>
-                    <div style="font-size: 12px; color: #64748b;">Ticket Duty + Physical Interruptions</div>
+                    <strong>Service Desk Tickets</strong>
+                    <div style="font-size: 12px; color: #64748b;">Scheduled Queue Time (Independent of Walk-ups)</div>
                 </div>
             </label>
             <div id="rotaSettings" class="compound-settings">
                 <div class="setting-row">
-                    <label>Dedicated Ticket Hours:</label>
-                    <input type="number" id="rotaHourValue" value="20" oninput="calculate()">
-                </div>
-                <div style="font-size: 11px; color: #64748b; margin-top: 5px; text-align: right;">
-                    + <span id="walkupCalc">3</span>h Walk-up Tax
+                    <label>Queue Hours:</label>
+                    <input type="number" id="rotaHourValue" value="10" oninput="calculate()">
                 </div>
             </div>
         </div>
@@ -354,6 +355,7 @@
             <div class="bar-label"><span>Weekly Allocation</span> <span id="totalUsedLabel">0/40h</span></div>
             <div class="progress-bg">
                 <div id="barAdmin" class="segment bg-admin" style="width: 0%"></div>
+                <div id="barWalkup" class="segment bg-walkup" style="width: 0%"></div>
                 <div id="barRota" class="segment bg-rota" style="width: 0%"></div>
                 <div id="barMentor" class="segment bg-mentor" style="width: 0%"></div>
                 <div id="barMgmt" class="segment bg-mgmt" style="width: 0%"></div>
@@ -365,7 +367,8 @@
 
         <div class="legend">
             <div class="legend-item"><div class="dot bg-admin"></div>Mtgs & Admin</div>
-            <div class="legend-item"><div class="dot bg-rota"></div>Tickets & Walk-ups</div>
+            <div class="legend-item"><div class="dot bg-walkup"></div>Walk-ups</div>
+            <div class="legend-item"><div class="dot bg-rota"></div>Tickets</div>
             <div class="legend-item"><div class="dot bg-mentor"></div>Mentor</div>
             <div class="legend-item"><div class="dot bg-mgmt"></div>Management</div>
             <div class="legend-item"><div class="dot bg-unplanned"></div>Unplanned</div>
@@ -405,14 +408,15 @@
 
         // Update Slider Labels
         document.getElementById('daysValue').innerText = daysInOffice + (daysInOffice === 1 ? " day" : " days");
-        document.getElementById('walkupCalc').innerText = daysInOffice;
+        document.getElementById('walkupHoursDisplay').innerText = daysInOffice;
 
         // 2. Logic & Calculation
         
-        // Rota Logic: Base Ticket Hours + Walkup Tax
-        const rotaBase = onRota ? (parseFloat(document.getElementById('rotaHourValue').value) || 0) : 0;
-        const walkupTax = daysInOffice * 1; 
-        const rotaTotal = rotaBase + walkupTax;
+        // Walk-up Tax (Calculated purely on office days)
+        const walkupHours = daysInOffice * 1; 
+
+        // Rota Logic: Base Ticket Hours (Input Only)
+        const rotaHours = onRota ? (parseFloat(document.getElementById('rotaHourValue').value) || 0) : 0;
 
         // Others
         const mentorBase = isEscalation ? (parseFloat(document.getElementById('mentorHourValue').value) || 0) : 0;
@@ -428,8 +432,8 @@
         }
 
         // 3. Totals
-        // "Work" excludes buffer for the purpose of the 'work bars', but 'Total Used' includes buffer
-        let workTotal = adminHours + rotaTotal + mentorBase + mgmtBase + projectBase + unplannedBase;
+        // Summing all distinct parts
+        let workTotal = adminHours + walkupHours + rotaHours + mentorBase + mgmtBase + projectBase + unplannedBase;
         let grandTotal = workTotal + bufferHours;
         let remaining = totalHours - grandTotal;
 
@@ -440,7 +444,7 @@
         const warningText = document.getElementById('warningText');
 
         if (remaining < 0) {
-            remainingEl.innerText = remaining.toFixed(1) + "h";
+            remainingEl.innerText = remaining.toFixed(2) + "h";
             remainingEl.className = "big-number negative";
             badge.style.background = "#fee2e2";
             badge.style.color = "#991b1b";
@@ -449,7 +453,7 @@
             warningBox.style.display = "block";
             warningText.innerText = "You have allocated " + grandTotal.toFixed(1) + " hours in a " + totalHours + " hour week.";
         } else {
-            remainingEl.innerText = remaining.toFixed(1) + "h";
+            remainingEl.innerText = remaining.toFixed(2) + "h";
             remainingEl.className = "big-number positive";
             badge.style.background = "#dcfce7";
             badge.style.color = "#166534";
@@ -459,7 +463,8 @@
 
         // 5. Update UI - Bars
         const pAdmin = (adminHours / totalHours) * 100;
-        const pRota = (rotaTotal / totalHours) * 100;
+        const pWalkup = (walkupHours / totalHours) * 100;
+        const pRota = (rotaHours / totalHours) * 100;
         const pMentor = (mentorBase / totalHours) * 100;
         const pMgmt = (mgmtBase / totalHours) * 100;
         const pUnplanned = (unplannedBase / totalHours) * 100;
@@ -467,6 +472,7 @@
         const pBuffer = (bufferHours / totalHours) * 100;
 
         document.getElementById('barAdmin').style.width = pAdmin + "%";
+        document.getElementById('barWalkup').style.width = pWalkup + "%";
         document.getElementById('barRota').style.width = pRota + "%";
         document.getElementById('barMentor').style.width = pMentor + "%";
         document.getElementById('barMgmt').style.width = pMgmt + "%";
