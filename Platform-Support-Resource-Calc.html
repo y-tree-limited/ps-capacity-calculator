@@ -12,14 +12,14 @@
             --border: #e2e8f0;
             
             /* Unified Color Palette */
-            --col-admin: #64748b;   /* Meetings & Admin */
-            --col-rota: #ef4444;    /* Tickets (Planned) */
-            --col-walkup: #991b1b;  /* Walk-ups (Physical Tax) - Dark Red */
-            --col-mentor: #06b6d4;  /* Mentor & Escalations */
-            --col-mgmt: #f59e0b;    /* Management */
-            --col-proj: #8b5cf6;    /* Project Work */
-            --col-unplanned: #db2777; /* Unplanned Firefighting */
-            --col-buffer: #a8a29e;  /* Safety Buffer */
+            --col-unplanned: #db2777; /* 1. Unplanned (Pink) */
+            --col-sd: #ef4444;        /* 2. SD (Red) */
+            --col-okr: #7c3aed;       /* 3. OKR (Purple) */
+            --col-project: #3b82f6;   /* 4. Project (Blue) */
+            --col-mgmt: #f59e0b;      /* 5. Mgmt (Orange) */
+            --col-admin: #06b6d4;     /* 6. Admin (Cyan) */
+            --col-meeting: #64748b;   /* 7. Meeting (Grey) */
+            --col-buffer: #a8a29e;    /* 8. Buffer (Striped) */
             
             --green: #22c55e;
         }
@@ -133,7 +133,7 @@
         }
         .big-number { font-size: 32px; font-weight: 800; }
         .positive { color: var(--green); }
-        .negative { color: var(--col-rota); }
+        .negative { color: var(--col-sd); }
 
         /* Bar Chart */
         .bar-container { margin-top: 20px; }
@@ -155,13 +155,14 @@
         .segment { height: 100%; transition: width 0.5s ease; }
         
         /* Colors Classes */
-        .bg-admin { background: var(--col-admin); }
-        .bg-rota { background: var(--col-rota); }
-        .bg-walkup { background: var(--col-walkup); }
-        .bg-mentor { background: var(--col-mentor); }
-        .bg-mgmt { background: var(--col-mgmt); }
-        .bg-proj { background: var(--col-proj); }
         .bg-unplanned { background: var(--col-unplanned); }
+        .bg-sd { background: var(--col-sd); }
+        .bg-walkup { background: #991b1b; } 
+        .bg-okr { background: var(--col-okr); }
+        .bg-project { background: var(--col-project); }
+        .bg-mgmt { background: var(--col-mgmt); }
+        .bg-admin { background: var(--col-admin); }
+        .bg-meeting { background: var(--col-meeting); }
         .bg-buffer { 
             background-color: var(--col-buffer);
             background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.2) 5px, rgba(255,255,255,0.2) 10px);
@@ -221,16 +222,11 @@
             <label>Days in Office (Weekly) <span id="daysValue" class="range-value">2 days</span></label>
             <input type="range" id="officeDays" min="0" max="5" step="1" value="2" oninput="calculate()">
             <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
-                Adds <span style="font-weight:bold" id="walkupHoursDisplay">2</span>h "Walk-up Tax" (Physical Interruptions)
+                Adds <span style="font-weight:bold" id="walkupHoursDisplay">2</span>h to <strong>#sd</strong> (Walk-up Tax)
             </div>
         </div>
 
-        <div class="input-group">
-            <label>Meetings & Admin (Weekly Hrs)</label>
-            <input type="number" id="adminHours" value="5" oninput="calculate()">
-        </div>
-
-        <h3>2. Commitments (Target/Plan)</h3>
+        <h3>2. Commitments (In Priority Order)</h3>
         
         <!-- Safety Buffer -->
         <div class="compound-group">
@@ -249,64 +245,13 @@
             </div>
         </div>
 
-        <!-- Tickets -->
-        <div class="compound-group">
-            <label class="checkbox-group">
-                <input type="checkbox" id="supportRota" onchange="calculate()">
-                <div style="flex-grow: 1;">
-                    <strong>Service Desk Tickets</strong>
-                    <div style="font-size: 12px; color: #64748b;">Scheduled Queue Time (Independent of Walk-ups)</div>
-                </div>
-            </label>
-            <div id="rotaSettings" class="compound-settings">
-                <div class="setting-row">
-                    <label>Queue Hours:</label>
-                    <input type="number" id="rotaHourValue" value="10" oninput="calculate()">
-                </div>
-            </div>
-        </div>
-
-        <!-- Mentor -->
-        <div class="compound-group">
-            <label class="checkbox-group">
-                <input type="checkbox" id="escalationPoint" onchange="calculate()">
-                <div style="flex-grow: 1;">
-                    <strong>Mentor & Escalations</strong>
-                    <div style="font-size: 12px; color: #64748b;">Technical Assist & Training</div>
-                </div>
-            </label>
-            <div id="mentorSettings" class="compound-settings">
-                <div class="setting-row">
-                    <label>Mentor Hours:</label>
-                    <input type="number" id="mentorHourValue" value="5" oninput="calculate()">
-                </div>
-            </div>
-        </div>
-
-        <!-- Management -->
-        <div class="compound-group">
-            <label class="checkbox-group">
-                <input type="checkbox" id="mgmtOverhead" onchange="calculate()">
-                <div style="flex-grow: 1;">
-                    <strong>Management</strong>
-                    <div style="font-size: 12px; color: #64748b;">Hiring, Reports, Strategy</div>
-                </div>
-            </label>
-            <div id="mgmtSettings" class="compound-settings">
-                <div class="setting-row">
-                    <label>Mgmt Hours:</label>
-                    <input type="number" id="mgmtHourValue" value="10" oninput="calculate()">
-                </div>
-            </div>
-        </div>
-
-        <!-- Unplanned Work -->
+        <!-- 1. #unplanned -->
         <div class="compound-group">
             <label class="checkbox-group">
                 <input type="checkbox" id="unplannedWork" onchange="calculate()">
                 <div style="flex-grow: 1;">
-                    <strong>Unplanned Work</strong>
-                    <div style="font-size: 12px; color: #64748b;">Reserve time for firefighting</div>
+                    <strong>1. #unplanned (Firefighting)</strong>
+                    <div style="font-size: 12px; color: #64748b;">Reserve time for unexpected issues</div>
                 </div>
             </label>
             <div id="unplannedSettings" class="compound-settings">
@@ -317,21 +262,99 @@
             </div>
         </div>
 
-        <!-- Project -->
+        <!-- 2. #sd -->
+        <div class="compound-group">
+            <label class="checkbox-group">
+                <input type="checkbox" id="supportRota" onchange="calculate()">
+                <div style="flex-grow: 1;">
+                    <strong>2. #sd (Service Desk)</strong>
+                    <div style="font-size: 12px; color: #64748b;">Planned Queue Time + Walk-up Tax</div>
+                </div>
+            </label>
+            <div id="rotaSettings" class="compound-settings">
+                <div class="setting-row">
+                    <label>Queue Hours:</label>
+                    <input type="number" id="rotaHourValue" value="10" oninput="calculate()">
+                </div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 5px; text-align: right;">
+                    + <span id="walkupCalc">2</span>h Walk-up Tax
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. #okr -->
+        <div class="compound-group">
+            <label class="checkbox-group">
+                <input type="checkbox" id="assignedOKR" onchange="calculate()">
+                <div style="flex-grow: 1;">
+                    <strong>3. #okr (Strategic Goals)</strong>
+                    <div style="font-size: 12px; color: #64748b;">Strategic OKR Deliverables</div>
+                </div>
+            </label>
+            <div id="okrSettings" class="compound-settings">
+                <div class="setting-row">
+                    <label>OKR Hours:</label>
+                    <input type="number" id="okrHourValue" value="5" oninput="calculate()">
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. #project -->
         <div class="compound-group">
             <label class="checkbox-group">
                 <input type="checkbox" id="assignedProject" onchange="calculate()">
                 <div style="flex-grow: 1;">
-                    <strong>Project Work</strong>
-                    <div style="font-size: 12px; color: #64748b;">Leading a project</div>
+                    <strong>4. #project (Standard Projects)</strong>
+                    <div style="font-size: 12px; color: #64748b;">Standard Project Work</div>
                 </div>
             </label>
             <div id="projectSettings" class="compound-settings">
                 <div class="setting-row">
                     <label>Project Hours:</label>
-                    <input type="number" id="projectHourValue" value="15" oninput="calculate()">
+                    <input type="number" id="projectHourValue" value="10" oninput="calculate()">
                 </div>
             </div>
+        </div>
+
+        <!-- 5. #mgmt -->
+        <div class="compound-group">
+            <label class="checkbox-group">
+                <input type="checkbox" id="mgmtWork" onchange="calculate()">
+                <div style="flex-grow: 1;">
+                    <strong>5. #mgmt (Management)</strong>
+                    <div style="font-size: 12px; color: #64748b;">Hiring, Policy, Strategy</div>
+                </div>
+            </label>
+            <div id="mgmtSettings" class="compound-settings">
+                <div class="setting-row">
+                    <label>Mgmt Hours:</label>
+                    <input type="number" id="mgmtHourValue" value="10" oninput="calculate()">
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. #admin -->
+        <div class="compound-group">
+            <label class="checkbox-group">
+                <input type="checkbox" id="adminWork" onchange="calculate()">
+                <div style="flex-grow: 1;">
+                    <strong>6. #admin (Admin & Ops)</strong>
+                    <div style="font-size: 12px; color: #64748b;">Documentation, Asset Mgmt, Billing</div>
+                </div>
+            </label>
+            <div id="adminSettings" class="compound-settings">
+                <div class="setting-row">
+                    <label>Admin Hours:</label>
+                    <input type="number" id="adminHourValue" value="5" oninput="calculate()">
+                </div>
+            </div>
+        </div>
+        
+        <!-- 7. #meeting -->
+        <div class="input-group">
+            <label>7. #meeting (Weekly Hrs)</label>
+            <input type="number" id="meetingHours" value="5" oninput="calculate()">
+            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Standard Meetings & Calls</div>
         </div>
 
     </div>
@@ -354,25 +377,27 @@
         <div class="bar-container">
             <div class="bar-label"><span>Weekly Allocation</span> <span id="totalUsedLabel">0/40h</span></div>
             <div class="progress-bg">
-                <div id="barAdmin" class="segment bg-admin" style="width: 0%"></div>
-                <div id="barWalkup" class="segment bg-walkup" style="width: 0%"></div>
-                <div id="barRota" class="segment bg-rota" style="width: 0%"></div>
-                <div id="barMentor" class="segment bg-mentor" style="width: 0%"></div>
-                <div id="barMgmt" class="segment bg-mgmt" style="width: 0%"></div>
+                <!-- Order: Unplanned -> SD -> OKR -> Project -> Mgmt -> Admin -> Meeting -> Buffer -->
                 <div id="barUnplanned" class="segment bg-unplanned" style="width: 0%"></div>
-                <div id="barProject" class="segment bg-proj" style="width: 0%"></div>
+                <div id="barWalkup" class="segment bg-walkup" style="width: 0%"></div>
+                <div id="barRota" class="segment bg-sd" style="width: 0%"></div>
+                <div id="barOKR" class="segment bg-okr" style="width: 0%"></div>
+                <div id="barProject" class="segment bg-project" style="width: 0%"></div>
+                <div id="barMgmt" class="segment bg-mgmt" style="width: 0%"></div>
+                <div id="barAdmin" class="segment bg-admin" style="width: 0%"></div>
+                <div id="barMeeting" class="segment bg-meeting" style="width: 0%"></div>
                 <div id="barBuffer" class="segment bg-buffer" style="width: 0%"></div>
             </div>
         </div>
 
         <div class="legend">
-            <div class="legend-item"><div class="dot bg-admin"></div>Mtgs & Admin</div>
-            <div class="legend-item"><div class="dot bg-walkup"></div>Walk-ups</div>
-            <div class="legend-item"><div class="dot bg-rota"></div>Tickets</div>
-            <div class="legend-item"><div class="dot bg-mentor"></div>Mentor</div>
-            <div class="legend-item"><div class="dot bg-mgmt"></div>Management</div>
-            <div class="legend-item"><div class="dot bg-unplanned"></div>Unplanned</div>
-            <div class="legend-item"><div class="dot bg-proj"></div>Project</div>
+            <div class="legend-item"><div class="dot bg-unplanned"></div>#unplanned</div>
+            <div class="legend-item"><div class="dot bg-sd"></div>#sd</div>
+            <div class="legend-item"><div class="dot bg-okr"></div>#okr</div>
+            <div class="legend-item"><div class="dot bg-project"></div>#project</div>
+            <div class="legend-item"><div class="dot bg-mgmt"></div>#mgmt</div>
+            <div class="legend-item"><div class="dot bg-admin"></div>#admin</div>
+            <div class="legend-item"><div class="dot bg-meeting"></div>#meeting</div>
             <div class="legend-item"><div class="dot bg-buffer" style="border: 1px solid #ccc;"></div>Buffer</div>
         </div>
 
@@ -389,39 +414,43 @@
         // 1. Get Inputs
         const totalHours = parseFloat(document.getElementById('totalHours').value) || 0;
         const daysInOffice = parseInt(document.getElementById('officeDays').value) || 0;
-        const adminHours = parseFloat(document.getElementById('adminHours').value) || 0;
+        const meetingHours = parseFloat(document.getElementById('meetingHours').value) || 0;
         
         const onRota = document.getElementById('supportRota').checked;
-        const isEscalation = document.getElementById('escalationPoint').checked;
-        const isMgmt = document.getElementById('mgmtOverhead').checked;
         const hasProject = document.getElementById('assignedProject').checked;
+        const hasOKR = document.getElementById('assignedOKR').checked;
         const hasUnplanned = document.getElementById('unplannedWork').checked;
+        const hasMgmt = document.getElementById('mgmtWork').checked;
+        const hasAdmin = document.getElementById('adminWork').checked;
         const useBuffer = document.getElementById('useBuffer').checked;
 
         // Toggle Settings Visibility
         document.getElementById('rotaSettings').style.display = onRota ? 'block' : 'none';
-        document.getElementById('mentorSettings').style.display = isEscalation ? 'block' : 'none';
-        document.getElementById('mgmtSettings').style.display = isMgmt ? 'block' : 'none';
         document.getElementById('projectSettings').style.display = hasProject ? 'block' : 'none';
+        document.getElementById('okrSettings').style.display = hasOKR ? 'block' : 'none';
         document.getElementById('unplannedSettings').style.display = hasUnplanned ? 'block' : 'none';
+        document.getElementById('mgmtSettings').style.display = hasMgmt ? 'block' : 'none';
+        document.getElementById('adminSettings').style.display = hasAdmin ? 'block' : 'none';
         document.getElementById('bufferSettings').style.display = useBuffer ? 'block' : 'none';
 
         // Update Slider Labels
         document.getElementById('daysValue').innerText = daysInOffice + (daysInOffice === 1 ? " day" : " days");
         document.getElementById('walkupHoursDisplay').innerText = daysInOffice;
+        document.getElementById('walkupCalc').innerText = daysInOffice;
 
         // 2. Logic & Calculation
         
-        // Walk-up Tax (Calculated purely on office days)
+        // Walk-up Tax
         const walkupHours = daysInOffice * 1; 
 
-        // Rota Logic: Base Ticket Hours (Input Only)
+        // Rota Logic
         const rotaHours = onRota ? (parseFloat(document.getElementById('rotaHourValue').value) || 0) : 0;
 
         // Others
-        const mentorBase = isEscalation ? (parseFloat(document.getElementById('mentorHourValue').value) || 0) : 0;
-        const mgmtBase = isMgmt ? (parseFloat(document.getElementById('mgmtHourValue').value) || 0) : 0;
+        const mgmtBase = hasMgmt ? (parseFloat(document.getElementById('mgmtHourValue').value) || 0) : 0;
+        const adminBase = hasAdmin ? (parseFloat(document.getElementById('adminHourValue').value) || 0) : 0;
         const projectBase = hasProject ? (parseFloat(document.getElementById('projectHourValue').value) || 0) : 0;
+        const okrBase = hasOKR ? (parseFloat(document.getElementById('okrHourValue').value) || 0) : 0;
         const unplannedBase = hasUnplanned ? (parseFloat(document.getElementById('unplannedHourValue').value) || 0) : 0;
 
         // Buffer Logic
@@ -432,8 +461,7 @@
         }
 
         // 3. Totals
-        // Summing all distinct parts
-        let workTotal = adminHours + walkupHours + rotaHours + mentorBase + mgmtBase + projectBase + unplannedBase;
+        let workTotal = meetingHours + walkupHours + rotaHours + mgmtBase + adminBase + projectBase + okrBase + unplannedBase;
         let grandTotal = workTotal + bufferHours;
         let remaining = totalHours - grandTotal;
 
@@ -462,22 +490,24 @@
         }
 
         // 5. Update UI - Bars
-        const pAdmin = (adminHours / totalHours) * 100;
+        const pMeeting = (meetingHours / totalHours) * 100;
         const pWalkup = (walkupHours / totalHours) * 100;
-        const pRota = (rotaHours / totalHours) * 100;
-        const pMentor = (mentorBase / totalHours) * 100;
+        const pAdmin = (adminBase / totalHours) * 100;
         const pMgmt = (mgmtBase / totalHours) * 100;
+        const pRota = (rotaHours / totalHours) * 100;
         const pUnplanned = (unplannedBase / totalHours) * 100;
         const pProject = (projectBase / totalHours) * 100;
+        const pOKR = (okrBase / totalHours) * 100;
         const pBuffer = (bufferHours / totalHours) * 100;
 
-        document.getElementById('barAdmin').style.width = pAdmin + "%";
+        document.getElementById('barMeeting').style.width = pMeeting + "%";
         document.getElementById('barWalkup').style.width = pWalkup + "%";
-        document.getElementById('barRota').style.width = pRota + "%";
-        document.getElementById('barMentor').style.width = pMentor + "%";
+        document.getElementById('barAdmin').style.width = pAdmin + "%";
         document.getElementById('barMgmt').style.width = pMgmt + "%";
+        document.getElementById('barRota').style.width = pRota + "%";
         document.getElementById('barUnplanned').style.width = pUnplanned + "%";
         document.getElementById('barProject').style.width = pProject + "%";
+        document.getElementById('barOKR').style.width = pOKR + "%";
         document.getElementById('barBuffer').style.width = pBuffer + "%";
         
         document.getElementById('totalUsedLabel').innerText = Math.min(grandTotal, totalHours).toFixed(1) + "/" + totalHours + "h";
